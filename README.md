@@ -4,7 +4,7 @@ Basic Chat Socket is a simple chat application using Socket.io and frontend use 
 
 ## Installation
 
-Make sure you are clone this repository `git clone https://github.com/ganes556/basic-chat-socket.git`
+Make sure you are cloning this repository `git clone https://github.com/ganes556/basic-chat-socket.git`
 
 To install Basic Chat Socket Backend, follow these steps:
 
