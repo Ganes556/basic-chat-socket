@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .stripped div:nth-child(odd) {
+    @apply bg-slate-400;
+  }
+}
