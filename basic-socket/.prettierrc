@@ -1,0 +1,13 @@
+{
+  "semi": true,
+
+  "overrides": [
+    {
+      "files": ["./src/**/*"],
+      "options": {
+        "semi": false,
+        "singleQuote": true
+      }
+    }
+  ]
+}
