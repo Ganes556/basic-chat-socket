@@ -60,16 +60,18 @@ const getIdByUsername = (username) =>
     (e) => e.username.toLowerCase() === username.toLowerCase()
   )[0]?.id;
 
-const checkUserAdmin = (auth) =>
+const checkUserAdminByAuth = (auth) =>
   userAdmin.findIndex(
     ({ username, password }) =>
       username === auth.username && password === auth.password
   );
+const checkUserAdminByUsername = (username) =>
+  userAdmin.findIndex((auth) => auth.username === username);
 const key = 'basicsocket<string>';
 
 ioAdmin.use((socket, next) => {
   const { username, password } = socket.handshake.auth;
-  const user = checkUserAdmin({ username, password });
+  const user = checkUserAdminByAuth({ username, password });
   if (user !== -1) {
     const { username } = userAdmin[user];
     socket.user = { username };
@@ -79,6 +81,8 @@ ioAdmin.use((socket, next) => {
     try {
       const decoded = jwt.verify(socket.handshake.auth.token, key);
       socket.user = decoded;
+      console.log(decoded);
+      userAdmin[checkUserAdminByUsername(decoded.username)]['id'] = socket.id;
       next();
     } catch (err) {
       next(new Error('Not authorized'));
@@ -100,9 +104,15 @@ ioAdmin.on('connection', (socket) => {
         : (messagesAdmin[room] = [message]);
       socket.to(room).emit('receive-message', message);
     } else if (to) {
-      socket
-        .to(getIdByUsername(to))
-        .emit('receive-message', `From "${socket.user.username}": ${message}`);
+      // console.log(to, userAdmin, getIdByUsername(to));
+      if (getIdByUsername(to)) {
+        socket
+          .to(getIdByUsername(to))
+          .emit(
+            'receive-message',
+            `From "${socket.user.username}": ${message}`
+          );
+      }
     } else {
       socket.broadcast.emit(
         'receive-message',

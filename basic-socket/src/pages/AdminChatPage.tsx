@@ -1,14 +1,29 @@
-import React, { useEffect } from "react"
-import { useOutletContext } from "react-router-dom"
-import Chat from "../components/Chat"
-import ChatAdmin from "../components/ChatAdmin"
+import React, { useEffect, useRef, useState } from 'react'
+import { useLocation, useOutletContext } from 'react-router-dom'
+import Chat from '../components/Chat'
+
+import { SocketContext } from '../components/PageLayout'
 
 function AdminChatPage() {
-  const { socketAdmin } = useOutletContext<SocketContext>()
+  const { socketState, dispatch, logged } = useOutletContext<SocketContext>()
+  // const [isSocketConnected, setIsSocketConnected] = useState<boolean>(
+  //   socketState.socketAdmin?.connected
+  // )
+  const location = useLocation()
 
+  useEffect(() => {}, [socketState.socketAdmin])
   return (
     <section className="m-auto w-1/2 min-w-fit max-w-full space-y-4">
-      <ChatAdmin socket={socketAdmin} />
+      {logged && <Chat varian="admin" socket={socketState.socketAdmin} />}
+      {!logged && (
+        <h1 className="text-center text-slate-200 text-xl">No allowed users</h1>
+      )}
+      {/* {isSocketConnected && (
+        <Chat varian="admin" socket={socketState.socketAdmin} />
+      )}
+      {!isSocketConnected && (
+        <h1 className="text-center text-slate-200 text-xl">No allowed users</h1>
+      )} */}
     </section>
   )
 }

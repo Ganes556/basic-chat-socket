@@ -1,18 +1,20 @@
-import React, { ContextType, FormEvent, useEffect, useState } from "react"
-import { useOutletContext } from "react-router-dom"
-import { Socket, io } from "socket.io-client"
+import React, { ContextType, FormEvent, useEffect, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
+import { Socket, io } from 'socket.io-client'
+import { SocketActionType, SocketContext } from '../components/PageLayout'
 
 function LoginPage() {
-  const { setSocketAdmin } = useOutletContext<SocketContext>()
+  const { dispatch } = useOutletContext<SocketContext>()
 
   function onLogin(e: FormEvent<HTMLFormElement>): void {
     e.preventDefault()
     const { username, password } = e.currentTarget
-    setSocketAdmin((prev: Socket) =>
-      io("http://localhost:3000/admin", {
-        auth: { username: username.value, password: password.value },
-      })
-    )
+    const usernameValue: string = (username as HTMLInputElement).value
+    const passwordValue: string = (password as HTMLInputElement).value
+    dispatch({
+      type: SocketActionType.ADMIN,
+      auth: { username: usernameValue, password: passwordValue },
+    })
   }
 
   return (
@@ -21,7 +23,7 @@ function LoginPage() {
       <form
         className="w-1/2 flex flex-col m-auto gap-5"
         onSubmit={onLogin}
-        method={"POST"}
+        method={'POST'}
       >
         <label htmlFor="username">Username</label>
         <input

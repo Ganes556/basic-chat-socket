@@ -1,82 +1,74 @@
-import React, { FormEvent, useEffect, useState } from "react"
-import { Socket } from "socket.io-client"
-import Action from "./Action"
-import { useOutletContext } from "react-router-dom"
+import React, { FormEvent, useEffect, useState } from 'react'
+import { Socket } from 'socket.io-client'
+import Action from './Action'
+import { useJwt } from 'react-jwt'
 
-type ChatProps = {
-  socket: Socket | undefined
+type User = {
+  varian?: 'user'
 }
+type Admin = {
+  varian: 'admin'
+}
+type ChatProps = {
+  socket: Socket
+} & (User | Admin)
 
-function Chat({ socket }: ChatProps) {
-  const [isSocketConnected, setIsSocketConnected] = useState(socket?.connected)
+interface JWT {
+  username: string | undefined
+}
+function Chat({ socket, varian }: ChatProps) {
   const [messages, setMessages] = useState<string[] | []>([])
   const [joinedRoom, setJoinedRoom] = useState<string | undefined>()
+  const { decodedToken } = useJwt<JWT>(localStorage.getItem('token') || '')
   useEffect(() => {
-    socket?.on("connect", () => {
-      setIsSocketConnected(true)
-      console.log(socket.id)
+    if (!varian || varian === 'user') {
       setMessages([`Connected by id: ${socket.id}`])
-    })
-    socket?.on("disconnected", () => {
-      setIsSocketConnected(false)
-      setMessages([`Disconnected from server`])
-    })
-    socket?.on("connect_error", (err) => {
-      setIsSocketConnected(false)
-      setMessages([err.message])
-    })
-
-    return () => {
-      socket?.off("connect")
-      socket?.off("disconnect")
-      socket?.off("connect_error")
     }
   }, [])
 
   useEffect(() => {
-    socket?.on("receive-message", (message) => {
+    socket.on('receive-message', (message: string) => {
       setMessages((prev) => [...prev, message])
     })
     return () => {
-      socket?.off("receive-message")
+      socket.off('receive-message')
     }
   }, [messages])
 
   function send(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const { message, to } = e.currentTarget
-    if (isSocketConnected) {
-      setMessages([...messages, `You: ${message.value}`])
-      if (joinedRoom) {
-        socket?.volatile.emit("send-message", message.value, {
-          room: joinedRoom,
-        })
-      } else {
-        socket?.volatile.emit("send-message", message.value, {
-          to: to.value ?? "",
-        })
-      }
+
+    setMessages([...messages, `You: ${message.value}`])
+    if (joinedRoom) {
+      socket.volatile.emit('send-message', message.value, {
+        room: joinedRoom,
+      })
     } else {
-      document.location.reload()
+      socket.volatile.emit('send-message', message.value, {
+        to: to.value ?? '',
+      })
     }
   }
   function join(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const { room } = e.currentTarget
-    socket?.emit("join-room", room.value, (message: string[]): void =>
+    socket?.emit('join-room', room.value, (message: string[]): void =>
       setMessages(message)
     )
     setJoinedRoom(room.value)
   }
 
   function leave() {
-    socket?.emit("quit-room", joinedRoom)
+    socket?.emit('quit-room', joinedRoom)
     setMessages([`You are leaving the room : ${joinedRoom}`])
     setJoinedRoom(undefined)
   }
-
   return (
     <>
+      {varian === 'admin' && decodedToken?.username && (
+        <h1>Hi, {decodedToken.username}</h1>
+      )}
       <div className="h-72 ring-2 flex flex-col text-slate-300 stripped overflow-auto">
         {messages.length > 0 &&
           messages.map((message, i) => (
@@ -89,7 +81,7 @@ function Chat({ socket }: ChatProps) {
         label="Message"
         btnName="Send"
         onAction={send}
-        nameInput={"message"}
+        nameInput={'message'}
       />
       <Action
         varian="room"
@@ -97,7 +89,7 @@ function Chat({ socket }: ChatProps) {
         btnName="Join"
         onAction={join}
         onLeave={leave}
-        nameInput={"room"}
+        nameInput={'room'}
       />
     </>
   )
