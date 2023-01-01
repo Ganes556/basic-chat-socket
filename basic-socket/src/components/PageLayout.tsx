@@ -50,30 +50,22 @@ function reducer(state: SocketState, action: SocketAction) {
 }
 
 export default function PageLayout() {
-  // const [socketAdmin, setSocketAdmin] = useState<Socket | undefined>()
   const [socketState, dispatch] = useReducer(reducer, {
     socket: undefined,
     socketAdmin: undefined,
   })
-  // isSocketConnected: false,
+
   const [logged, setLogged] = useState<boolean>(false)
   const navigate = useNavigate()
   const location = useLocation()
 
   useEffect(() => {
-    // console.log(socketState.socketAdmin, logged.current)
     if (localStorage.getItem('token')) {
       console.log()
       dispatch({
         type: SocketActionType.ADMIN,
         auth: { token: localStorage.getItem('token') || '' },
       })
-      // console.log(socketState.socketAdmin?.connected)
-
-      // return () => {
-      //   socketState.socketAdmin?.off('connect')
-      //   socketState.socketAdmin?.off('disconnect')
-      // }
     }
 
     if (location.pathname !== '/admin-chat') {
@@ -83,7 +75,6 @@ export default function PageLayout() {
 
   useEffect(() => {
     socketState.socketAdmin?.on('connect', () => {
-      // logged.current = true
       setLogged(true)
       if (location.pathname !== '/admin-chat') {
         navigate('/admin-chat')
@@ -93,7 +84,6 @@ export default function PageLayout() {
       })
     })
     socketState.socketAdmin?.on('connect_error', (err) => {
-      // logged.current = false
       if (
         err.message === 'Not authorized' ||
         err.message === 'Not authenticated'
@@ -107,6 +97,7 @@ export default function PageLayout() {
       socketState.socketAdmin?.off('token')
     }
   }, [socketState.socketAdmin])
+
   return (
     <>
       <header className="container flex fixed py-5 px-3 bg-blue-700 max-w-full justify-center">
@@ -134,19 +125,6 @@ export default function PageLayout() {
               </button>
             </li>
           )}
-          {/* {logged.current && (
-            <li className="text-xl">
-              <button
-                onClick={() => {
-                  logged.current = false
-                  localStorage.removeItem('token')
-                  navigate('/login')
-                }}
-              >
-                Logout
-              </button>
-            </li>
-          )} */}
         </ul>
       </header>
       <main className="w-screen p-2 min-h-screen max-h-full flex bg-slate-500">

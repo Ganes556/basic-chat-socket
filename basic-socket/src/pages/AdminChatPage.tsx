@@ -6,9 +6,7 @@ import { SocketContext } from '../components/PageLayout'
 
 function AdminChatPage() {
   const { socketState, dispatch, logged } = useOutletContext<SocketContext>()
-  // const [isSocketConnected, setIsSocketConnected] = useState<boolean>(
-  //   socketState.socketAdmin?.connected
-  // )
+
   const location = useLocation()
 
   useEffect(() => {}, [socketState.socketAdmin])
@@ -18,12 +16,6 @@ function AdminChatPage() {
       {!logged && (
         <h1 className="text-center text-slate-200 text-xl">No allowed users</h1>
       )}
-      {/* {isSocketConnected && (
-        <Chat varian="admin" socket={socketState.socketAdmin} />
-      )}
-      {!isSocketConnected && (
-        <h1 className="text-center text-slate-200 text-xl">No allowed users</h1>
-      )} */}
     </section>
   )
 }
