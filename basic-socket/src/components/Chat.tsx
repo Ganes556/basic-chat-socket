@@ -66,9 +66,7 @@ function Chat({ socket, varian }: ChatProps) {
   }
   return (
     <>
-      {varian === 'admin' && decodedToken?.username && (
-        <h1>Hi, {decodedToken.username}</h1>
-      )}
+      {decodedToken?.username && <h1>Hi, {decodedToken.username}</h1>}
       <div className="h-72 ring-2 flex flex-col text-slate-300 stripped overflow-auto">
         {messages.length > 0 &&
           messages.map((message, i) => (

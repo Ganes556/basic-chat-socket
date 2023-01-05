@@ -1,17 +1,17 @@
-import { Dispatch, useEffect, useReducer, useRef, useState } from 'react'
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
+import { useReducer, useState } from 'react'
+import { Outlet, Link, useNavigate } from 'react-router-dom'
 import { Socket, io } from 'socket.io-client'
+import useCheckAdmin from '../hooks/useCheckAdmin'
 
 export enum SocketActionType {
   USER = 'USER',
   ADMIN = 'ADMIN',
 }
-
 export interface SocketAction {
   type: SocketActionType
   auth?: { username: string; password: string } | { token: string }
 }
-interface SocketState {
+export interface SocketState {
   socket: Socket | undefined
   socketAdmin: Socket | undefined
 }
@@ -57,46 +57,8 @@ export default function PageLayout() {
 
   const [logged, setLogged] = useState<boolean>(false)
   const navigate = useNavigate()
-  const location = useLocation()
 
-  useEffect(() => {
-    if (localStorage.getItem('token')) {
-      console.log()
-      dispatch({
-        type: SocketActionType.ADMIN,
-        auth: { token: localStorage.getItem('token') || '' },
-      })
-    }
-
-    if (location.pathname !== '/admin-chat') {
-      dispatch({ type: SocketActionType.USER })
-    }
-  }, [location])
-
-  useEffect(() => {
-    socketState.socketAdmin?.on('connect', () => {
-      setLogged(true)
-      if (location.pathname !== '/admin-chat') {
-        navigate('/admin-chat')
-      }
-      socketState.socketAdmin?.on('token', (token) => {
-        localStorage.setItem('token', token)
-      })
-    })
-    socketState.socketAdmin?.on('connect_error', (err) => {
-      if (
-        err.message === 'Not authorized' ||
-        err.message === 'Not authenticated'
-      ) {
-        setLogged(false)
-        alert(err.message)
-      }
-    })
-    return () => {
-      socketState.socketAdmin?.off('connect_error')
-      socketState.socketAdmin?.off('token')
-    }
-  }, [socketState.socketAdmin])
+  useCheckAdmin(socketState, dispatch, setLogged)
 
   return (
     <>
@@ -128,10 +90,7 @@ export default function PageLayout() {
         </ul>
       </header>
       <main className="w-screen p-2 min-h-screen max-h-full flex bg-slate-500">
-        <Outlet
-          // context={{ socketAdmin, setSocketAdmin, token: tokenRef.current }}
-          context={{ socketState, dispatch, logged }}
-        />
+        <Outlet context={{ socketState, dispatch, logged }} />
       </main>
     </>
   )
