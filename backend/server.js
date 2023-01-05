@@ -12,18 +12,19 @@ const jwt = require('jsonwebtoken');
 const messages = {};
 io.on('connection', (socket) => {
   socket.on('send-message', (message, { to, room }) => {
-    const messageModified = `From "${socket.id}": ${message}`;
     if (room) {
+      message = `Room ${room}, "${socket.id}": ${message}`;
       messages[room]
         ? messages[room].push(message)
         : (messages[room] = [message]);
-      socket.to(room).emit('receive-message', messageModified);
+      socket.to(room).emit('receive-message', message);
     } else if (to) {
-      socket.to(to).emit('receive-message', messageModified);
+      message = `From "${socket.id}": ${message}`;
+      socket.to(to).emit('receive-message', message);
     } else {
       socket.broadcast.emit(
         'receive-message',
-        `Public chat, from id:" ${socket.id}": ${message}`
+        `Public, from "${socket.id}": ${message}`
       );
     }
   });
@@ -81,7 +82,6 @@ ioAdmin.use((socket, next) => {
     try {
       const decoded = jwt.verify(socket.handshake.auth.token, key);
       socket.user = decoded;
-      console.log(decoded);
       userAdmin[checkUserAdminByUsername(decoded.username)]['id'] = socket.id;
       next();
     } catch (err) {
@@ -93,7 +93,6 @@ ioAdmin.use((socket, next) => {
 });
 
 const messagesAdmin = {};
-
 ioAdmin.on('connection', (socket) => {
   socket.emit('token', jwt.sign(socket.user, key));
   socket.on('send-message', (message, { to, room }) => {
@@ -104,7 +103,6 @@ ioAdmin.on('connection', (socket) => {
         : (messagesAdmin[room] = [message]);
       socket.to(room).emit('receive-message', message);
     } else if (to) {
-      // console.log(to, userAdmin, getIdByUsername(to));
       if (getIdByUsername(to)) {
         socket
           .to(getIdByUsername(to))
