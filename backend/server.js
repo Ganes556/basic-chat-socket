@@ -3,9 +3,9 @@
 // /**
 //  * @type {Socket}
 //  */
-const io = require('socket.io')(3000, {
+const io = require('socket.io')(5000, {
   cors: {
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:3000'],
   },
 });
 const jwt = require('jsonwebtoken');

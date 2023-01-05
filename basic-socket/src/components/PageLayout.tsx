@@ -28,14 +28,14 @@ function reducer(state: SocketState, action: SocketAction) {
   switch (type) {
     case SocketActionType.USER:
       return {
-        socket: io('http://localhost:3000'),
+        socket: io('http://localhost:5000'),
         socketAdmin: state.socketAdmin,
       }
     case SocketActionType.ADMIN:
       if (action.auth) {
         return {
           socket: state.socket,
-          socketAdmin: io('http://localhost:3000/admin', {
+          socketAdmin: io('http://localhost:5000/admin', {
             auth: { ...action.auth },
           }),
         }
