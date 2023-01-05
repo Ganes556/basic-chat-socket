@@ -3,5 +3,6 @@
 ## Technologies
 
 - React Typescript
+- ReactRouter
 - Socket
 - Tailwind
